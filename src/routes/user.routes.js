@@ -10,16 +10,15 @@ router.route('/register').post(
 
     upload.fields(// it accepts an array of fileds to inject in it
         {
-            name:avatar,
+            name: 'avatar',
             maxCount:1
 
         },
         {
-            name:CoverImage ,
+            name:'CoverImage' ,
             maxCount:1
         }
     ),
-
     registerUser
     );
 
