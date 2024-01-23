@@ -1,5 +1,5 @@
 import mongoose,{Schema} from 'mongoose'
-
+import bcrypt from 'bcrypt'
 
 const userSchema=new Schema({
 
@@ -52,14 +52,28 @@ const userSchema=new Schema({
 
 // this is used so that we can do things in current context only
 
-    userSchema.pre("save",async function(next){
-        //agar password modify hua toh hi vapis save krenge
-        if(!this.isModified("password")) return next();
+    // userSchema.pre("save",async function(next){
+    //     //agar password modify hua toh hi vapis save krenge
+    //     if(!this.isModified("password")) return next();
 
-        this.password=await bcrypt.hash(this.password)
-        next()
+    //     this.password=await bcrypt.hash(this.password,10)
+    //     next()
 
-    })
+    // })
+
+   
+
+    userSchema.pre("save", async function (next) {
+        try {
+            if (!this.isModified("password")) return next();
+    
+            this.password = await bcrypt.hash(this.password, 10);
+            next();
+        } catch (error) {
+            return next(error);
+        }
+    });
+    
 
     userSchema.methods.isPasswordCorrect=async function (password)
     {
@@ -91,5 +105,5 @@ const userSchema=new Schema({
 
     }
 
- const User=mongoose.model('User',userSchema);
- export default {User}
+ 
+export const User = mongoose.model("User", userSchema)

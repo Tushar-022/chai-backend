@@ -4,7 +4,8 @@
 //  It's a common pattern to handle promises and asynchronous code in Express.js middleware and route handlers.
 
 const asyncHandler = (requestHandler) => {
-    return (req, res, next) => {
+    return (req, res, next) =>
+    {
         Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err))
     }
 }
