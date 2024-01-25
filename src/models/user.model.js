@@ -1,5 +1,6 @@
 import mongoose,{Schema} from 'mongoose'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const userSchema=new Schema({
 
@@ -50,21 +51,14 @@ const userSchema=new Schema({
    timestamps: true
 }  )
 
-// this is used so that we can do things in current context only
 
-    // userSchema.pre("save",async function(next){
-    //     //agar password modify hua toh hi vapis save krenge
-    //     if(!this.isModified("password")) return next();
 
-    //     this.password=await bcrypt.hash(this.password,10)
-    //     next()
-
-    // })
 
    
 
     userSchema.pre("save", async function (next) {
         try {
+            // this holds the instance of the above object created  so whenever password change hua then apn changes kr denge
             if (!this.isModified("password")) return next();
     
             this.password = await bcrypt.hash(this.password, 10);
@@ -81,28 +75,38 @@ const userSchema=new Schema({
 
     }
 
-    userSchema.methods.generateAcessToken=function()
-    {
-        jwt.sign({
-            _id:this.id,
-            email:this.email,
-            userName:this.userName,
-            fullName:this.fullName
-        }),
-        process.env.ACCESS_TOKEN_SECRET,{
-            expiresIn:process.env.ACCESS_TOKEN_EXPIRY
-        }
 
+
+    // In the context of user authentication, the payload typically contains information about the user.
+    //  The payload is then signed using a secret key to generate a JWT.
+    
+    userSchema.methods.generateAccessToken = function(){
+        return jwt.sign(
+            {
+                _id: this._id,
+                email: this.email,
+                username: this.username,
+                fullName: this.fullName
+            },
+            process.env.ACCESS_TOKEN_SECRET,
+            {
+                expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+            }
+        )
     }
 
-    userSchema.methods.generateRefreshToken=function(){
-        jwt.sign({
-            _id:this.id
-        }),
-        process.env.REFRESH_ACCESS_TOKEN,{
-            expiresIn:process.env.REFRESH_TOKEN_EXPIRY
-        }
-
+    
+    userSchema.methods.generateRefreshToken = function(){
+        return jwt.sign(
+            {
+                _id: this._id,
+                
+            },
+            process.env.REFRESH_TOKEN_SECRET,
+            {
+                expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+            }
+        )
     }
 
  
